@@ -15,4 +15,8 @@ class Company extends Model {
     public function employees() {
         return $this->hasMany("App\Employee");
     }
+    
+    public function managers() {
+        return $this->belongsToMany("App\User", "user_company")->withTimestamps();
+    }
 }

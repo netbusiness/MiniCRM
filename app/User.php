@@ -48,4 +48,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    public function companies() {
+        return $this->belongsToMany("App\Company", "user_company" /* used the wrong name */)->withTimestamps();
+    }
+    
+    public function isManager() {
+        return $this->access_level === self::ACCESS_LEVEL_MANAGER;
+    }
+    
+    public function isAdmin() {
+        return $this->access_level === self::ACCESS_LEVEL_ADMIN;
+    }
 }
