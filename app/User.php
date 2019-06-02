@@ -5,14 +5,22 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
     use Notifiable;
+    use SoftDeletes;
     
     const ACCESS_LEVEL_MANAGER =    1;
     // Leave room for more
     const ACCESS_LEVEL_ADMIN =      10;
+    
+    // Can do this now
+    const ACCESS_LEVELS = [
+        "manager"   => self::ACCESS_LEVEL_MANAGER,
+        "admin"     => self::ACCESS_LEVEL_ADMIN
+    ];
     
     /**
      * The attributes that are mass assignable.

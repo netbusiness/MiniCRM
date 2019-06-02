@@ -15,6 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+// Good luck finding docs for this command
+Auth::routes(['register' => false]);
 
 Route::get('/home', 'HomeController@index')->name('home');

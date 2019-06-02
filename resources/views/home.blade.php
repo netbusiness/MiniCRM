@@ -14,7 +14,12 @@
                         </div>
                     @endif
 
-                    You are logged in!
+                    You are logged in!<br>
+                    @accessLevel('manager')
+                    Manager
+                    @elseaccessLevel('admin')
+                    Admin
+                    @endaccessLevel
                 </div>
             </div>
         </div>
