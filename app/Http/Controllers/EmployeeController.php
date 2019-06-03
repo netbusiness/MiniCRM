@@ -101,7 +101,26 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, Employee $employee)
     {
-        //
+        $data = $request->validate([
+            "first_name" => "required",
+            "last_name" => "required",
+            "company_id" => "required|exists:companies,id,deleted_at,NULL",
+            "email" => "sometimes|email",
+            "phone" => "max:30"
+        ]);
+        
+        if (!\Auth::user()->isAdmin()) {
+            // Security check
+            $authorizedCompanies = \Auth::user()->companies()->get();
+            
+            if (!$authorizedCompanies->contains($employee->company_id)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    "company_id" => "You are not allowed to modify this employee"
+                ]);
+            }
+        }
+        
+        $employee->update(\Arr::except($data, ['company_id']));
     }
 
     /**
