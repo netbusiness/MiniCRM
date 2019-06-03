@@ -22,12 +22,12 @@ class CompanyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         if (\Auth::user()->isAdmin()) {
-            return response(Company::all());
+            return response(Company::paginate(10));
         } else {
-            return response(\Auth::user()->companies()->get());
+            return response(\Auth::user()->companies()->paginate(10));
         }
     }
 

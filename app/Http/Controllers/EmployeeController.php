@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
@@ -22,15 +23,22 @@ class EmployeeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $data = $request->validate([
+            "company_id" => [
+                "exists:companies,id,deleted_at,NULL",
+                Rule::requiredIf(!\Auth::user()->isAdmin())
+            ]
+        ]);
         // TODO: Fix this
-        if (\Auth::user()->isAdmin()) {
+        /* if (\Auth::user()->isAdmin()) {
             return response(Employee::all());
         } else {
             return response(\Auth::user()->companies()->with("employees")->get());
             // return response(\Auth::user()->companies()->employees);
-        }
+        } */
+        return response(Employee::where("company_id", $data['company_id'])->paginate(10));
     }
 
     /**

@@ -23,6 +23,15 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        return view('home', ["userData" => \Auth::user()]);
+    }
+    
+    /**
+     * Show the employees in this company and potentially edit them
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function employeeIndex($id) {
+       return view("employee_home", ["userData" => \Auth::user(), "companyId" => $id]); 
     }
 }
