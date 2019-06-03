@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="row mb-3"><button class="btn btn-success" v-on:click="newCompany()">Add New Company</button></div>
+    <div class="row mb-3" v-if="userData.access_level == 10"><button class="btn btn-success" v-on:click="newCompany()">Add New Company</button></div>
     <div class="row">
       <div class="col-md-4 mb-3" v-for="company in companies">
         <div class="card">

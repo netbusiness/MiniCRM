@@ -37716,20 +37716,22 @@ var render = function() {
     "div",
     { staticClass: "container" },
     [
-      _c("div", { staticClass: "row mb-3" }, [
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-success",
-            on: {
-              click: function($event) {
-                return _vm.newCompany()
-              }
-            }
-          },
-          [_vm._v("Add New Company")]
-        )
-      ]),
+      _vm.userData.access_level == 10
+        ? _c("div", { staticClass: "row mb-3" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-success",
+                on: {
+                  click: function($event) {
+                    return _vm.newCompany()
+                  }
+                }
+              },
+              [_vm._v("Add New Company")]
+            )
+          ])
+        : _vm._e(),
       _vm._v(" "),
       _c(
         "div",
