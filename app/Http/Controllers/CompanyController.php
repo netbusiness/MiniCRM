@@ -26,7 +26,11 @@ class CompanyController extends Controller
     public function index(Request $request)
     {
         if (\Auth::user()->isAdmin()) {
-            return response(Company::paginate(10));
+            if ($request->has("all") && !!$request->input("all")) {
+                return response(Company::all());
+            } else {
+                return response(Company::paginate(10));
+            }
         } else {
             return response(\Auth::user()->companies()->paginate(10));
         }

@@ -20,6 +20,8 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/home/company/{id}', 'HomeController@employeeIndex');
+Route::get('/home/managers', 'HomeController@managerIndex');
 
 Route::resource("/companies", "CompanyController")->except(['create', 'edit']);
 Route::resource("/employees", "EmployeeController")->except(['create', 'edit']);
+Route::resource("/managers", "ManagerController")->except(['create', 'edit']);

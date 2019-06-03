@@ -12,8 +12,8 @@
             <p>{{ company.email }}</p>
             <p>{{ company.website }}</p>
             <div v-if="userData.access_level == 10">
-              <a href="#" class="btn btn-primary">Edit</a>
-              <a href="#" class="btn btn-danger float-right">Delete</a>
+              <a href="#" class="btn btn-primary" v-on:click="editCompany(company)">Edit</a>
+              <a href="#" class="btn btn-danger float-right" v-on:click="confirmDelete(company)">Delete</a>
             </div>
           </div>
         </div>
@@ -85,6 +85,21 @@
       companyPage(company_id) {
         return "/home/company/" + company_id;
       },
+      confirmDelete: function(company) {
+        bootbox.confirm("Are you sure you want to delete " + company.name + "?", (yesNo) => {
+          if (yesNo) {
+            this.delete(company.id);
+          }
+        });
+      },
+      editCompany: function(company) {
+        this.companyId = company.id;
+        this.companyName = company.name;
+        this.companyEmail = company.email;
+        this.companyLogo = company.logo;
+        this.isNewCompany = false;
+        $("#addCompanyModel").modal("show");
+      },
       gotoPage: function(pageNumber) {
         this.pageNumber = pageNumber;
         this.read();
@@ -126,6 +141,7 @@
         if (this.isNewCompany) {
           this.create(formData);
         } else {
+          formData.append("_method", "put"); // Work around dumb bug in laravel
           this.update(this.companyId, formData);
         }
         
@@ -149,7 +165,7 @@
       },
       update(id, company) {
         console.log(id, company);
-        window.axios.put(`/companies/${id}`, company, {
+        window.axios.post(`/companies/${id}`, company, {
           headers: {'content-type': 'multipart/form-data'}
         }).then(() => {
           this.read();
