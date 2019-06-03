@@ -1,10 +1,11 @@
 <template>
   <div class="container">
+    <div class="row mb-3"><button class="btn btn-success" v-on:click="newCompany()">Add New Company</button></div>
     <div class="row">
       <div class="col-md-4 mb-3" v-for="company in companies">
         <div class="card">
           <a v-bind:href="companyPage(company.id)">
-            <img class="card-img-top" v-bind:src="image">
+            <img class="card-img-top" v-bind:src="company.logo || image">
             <div class="card-header">{{ company.name }}</div>
           </a>
           <div class="card-body">
@@ -18,13 +19,44 @@
         </div>
       </div>
     </div>
-    <nav class="mt-3" v-if="totalPages > 1">
-      <ul class="pagination justify-content-center">
-        <li class="page-item" v-bind:class="{disabled: pageNumber == 1}"><a class="page-link" href="#">&lt;</a></li>
-        <li class="page-item" v-bind:class="{active: pageNumber == i}" v-for="i in totalPages"><a class="page-link" href="#">{{ i }}</a></li>
-        <li class="page-item" v-bind:class="{disabled: pageNumber == totalPages}"><a class="page-link" href="#">&gt;</a></li>
-      </ul>
-    </nav>
+    <paginator v-bind:totalPages="totalPages" v-bind:pageNumber="pageNumber" v-on:changePage="gotoPage($event)"></paginator>
+    <div id="addCompanyModel" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 v-if="isNewCompany" class="modal-title">Add New Company</h5>
+            <h5 v-else class="modal-title">Edit Company</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="">
+              <div class="form-group">
+                <label for="newCompanyName">Name*</label>
+                <input type="text" name="name" id="newCompanyName" class="form-control" v-model="companyName">
+              </div>
+              <div class="form-group">
+                <label for="newCompanyEmail">Email</label>
+                <input type="text" name="email" id="newCompanyEmail" class="form-control" v-model="companyEmail">
+              </div>
+              <div class="form-group">
+                <label for="newCompanyWebsite">Website</label>
+                <input type="text" name="website" id="newCompanyWebsite" class="form-control" v-model="companyWebsite">
+              </div>
+              <div class="form-group">
+                <label for="newCompanyLogo">Logo</label>
+                <input type="file" name="logo" id="newCompanyLogo" class="form-control" v-on:change="onImageChange">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" v-on:click="saveCompany()">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -34,7 +66,13 @@
       return {
         companies: [],
         pageNumber: 1,
-        totalPages: 1
+        totalPages: 1,
+        companyId: null,
+        companyName: '',
+        companyLogo: null,
+        companyEmail: '',
+        companyWebsite: '',
+        isNewCompany: false
       };
     },
     props: ['userData'],
@@ -47,6 +85,52 @@
       companyPage(company_id) {
         return "/home/company/" + company_id;
       },
+      gotoPage: function(pageNumber) {
+        this.pageNumber = pageNumber;
+        this.read();
+      },
+      onImageChange: function(event) {
+        var files = event.target.files || event.dataTransfer.files;
+        if (!files.length) {
+          return;
+        }
+        
+        var reader = new FileReader();
+        var vm = this;
+        reader.onload = (e) => {
+          vm.companyLogo = e.target.result;
+          console.log(vm.companyLogo);
+        };
+        reader.readAsDataURL(files[0]);
+      },
+      newCompany() {
+        $("#newCompanyLogo").get()[0].form.reset(); // Clear file dialog
+        this.companyId = null;
+        this.companyName = '';
+        this.companyLogo = null;
+        this.companyEmail = '';
+        this.companyWebsite = '';
+        this.isNewCompany = true;
+        $("#addCompanyModel").modal("show");
+      },
+      saveCompany() {
+        /* var company = {};
+        company.id = this.companyId;
+        company.name = this.companyName;
+        company.email = this.companyEmail;
+        company.website = this.companyWebsite;
+        company.logo = this.companyLogo; */
+        
+        var formData = new FormData(document.getElementById("newCompanyLogo").form);
+        
+        if (this.isNewCompany) {
+          this.create(formData);
+        } else {
+          this.update(this.companyId, formData);
+        }
+        
+        $("#addCompanyModel").modal("hide");
+      },
       read() {
         // let url = "/companies?page=" + this.pageNumber;
         window.axios.get("/companies", {params: {page: this.pageNumber}}).then(({data}) => {
@@ -56,15 +140,26 @@
           this.pageNumber = data.current_page;
         });
       },
-      update(id, foobar) {
-        console.log(id, foobar);
-        /* window.axios.put(`/companies/${id}`, {foobar}).then(() => {
-          
-        }); */
+      create(company) {
+        window.axios.post("/companies", company, {
+          headers: {'content-type': 'multipart/form-data'}
+        }).then(() => {
+          this.read();
+        });
+      },
+      update(id, company) {
+        console.log(id, company);
+        window.axios.put(`/companies/${id}`, company, {
+          headers: {'content-type': 'multipart/form-data'}
+        }).then(() => {
+          this.read();
+        });
+      },
+      delete(id) {
+        window.axios.delete(`/companies/${id}`).then(() => {
+          this.read();
+        });
       }
-    },
-    mounted() {
-      // console.log(this.userData);
     },
     created() {
       this.read();

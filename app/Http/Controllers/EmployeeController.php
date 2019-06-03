@@ -63,8 +63,8 @@ class EmployeeController extends Controller
             "first_name" => "required",
             "last_name" => "required",
             "company_id" => "required|exists:companies,id,deleted_at,NULL",
-            "email" => "sometimes|email",
-            "phone" => "max:30"
+            "email" => "nullable|email",
+            "phone" => "nullable|max:30"
         ]);
         
         return response(Employee::create($data));
@@ -105,8 +105,8 @@ class EmployeeController extends Controller
             "first_name" => "required",
             "last_name" => "required",
             "company_id" => "required|exists:companies,id,deleted_at,NULL",
-            "email" => "sometimes|email",
-            "phone" => "max:30"
+            "email" => "nullable|email",
+            "phone" => "nullable|max:30"
         ]);
         
         if (!\Auth::user()->isAdmin()) {

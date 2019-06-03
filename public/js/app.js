@@ -1727,12 +1727,50 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       companies: [],
       pageNumber: 1,
-      totalPages: 1
+      totalPages: 1,
+      companyId: null,
+      companyName: '',
+      companyLogo: null,
+      companyEmail: '',
+      companyWebsite: '',
+      isNewCompany: false
     };
   },
   props: ['userData'],
@@ -1744,6 +1782,55 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     companyPage: function companyPage(company_id) {
       return "/home/company/" + company_id;
+    },
+    gotoPage: function gotoPage(pageNumber) {
+      this.pageNumber = pageNumber;
+      this.read();
+    },
+    onImageChange: function onImageChange(event) {
+      var files = event.target.files || event.dataTransfer.files;
+
+      if (!files.length) {
+        return;
+      }
+
+      var reader = new FileReader();
+      var vm = this;
+
+      reader.onload = function (e) {
+        vm.companyLogo = e.target.result;
+        console.log(vm.companyLogo);
+      };
+
+      reader.readAsDataURL(files[0]);
+    },
+    newCompany: function newCompany() {
+      $("#newCompanyLogo").get()[0].form.reset(); // Clear file dialog
+
+      this.companyId = null;
+      this.companyName = '';
+      this.companyLogo = null;
+      this.companyEmail = '';
+      this.companyWebsite = '';
+      this.isNewCompany = true;
+      $("#addCompanyModel").modal("show");
+    },
+    saveCompany: function saveCompany() {
+      /* var company = {};
+      company.id = this.companyId;
+      company.name = this.companyName;
+      company.email = this.companyEmail;
+      company.website = this.companyWebsite;
+      company.logo = this.companyLogo; */
+      var formData = new FormData(document.getElementById("newCompanyLogo").form);
+
+      if (this.isNewCompany) {
+        this.create(formData);
+      } else {
+        this.update(this.companyId, formData);
+      }
+
+      $("#addCompanyModel").modal("hide");
     },
     read: function read() {
       var _this = this;
@@ -1761,14 +1848,36 @@ __webpack_require__.r(__webpack_exports__);
         _this.pageNumber = data.current_page;
       });
     },
-    update: function update(id, foobar) {
-      console.log(id, foobar);
-      /* window.axios.put(`/companies/${id}`, {foobar}).then(() => {
-        
-      }); */
+    create: function create(company) {
+      var _this2 = this;
+
+      window.axios.post("/companies", company, {
+        headers: {
+          'content-type': 'multipart/form-data'
+        }
+      }).then(function () {
+        _this2.read();
+      });
+    },
+    update: function update(id, company) {
+      var _this3 = this;
+
+      console.log(id, company);
+      window.axios.put("/companies/".concat(id), company, {
+        headers: {
+          'content-type': 'multipart/form-data'
+        }
+      }).then(function () {
+        _this3.read();
+      });
+    },
+    "delete": function _delete(id) {
+      var _this4 = this;
+
+      window.axios["delete"]("/companies/".concat(id)).then(function () {
+        _this4.read();
+      });
     }
-  },
-  mounted: function mounted() {// console.log(this.userData);
   },
   created: function created() {
     this.read();
@@ -37373,110 +37482,276 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "container" }, [
-    _c(
-      "div",
-      { staticClass: "row" },
-      _vm._l(_vm.companies, function(company) {
-        return _c("div", { staticClass: "col-md-4 mb-3" }, [
-          _c("div", { staticClass: "card" }, [
-            _c("a", { attrs: { href: _vm.companyPage(company.id) } }, [
-              _c("img", {
-                staticClass: "card-img-top",
-                attrs: { src: _vm.image }
-              }),
+  return _c(
+    "div",
+    { staticClass: "container" },
+    [
+      _c("div", { staticClass: "row mb-3" }, [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-success",
+            on: {
+              click: function($event) {
+                return _vm.newCompany()
+              }
+            }
+          },
+          [_vm._v("Add New Company")]
+        )
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "row" },
+        _vm._l(_vm.companies, function(company) {
+          return _c("div", { staticClass: "col-md-4 mb-3" }, [
+            _c("div", { staticClass: "card" }, [
+              _c("a", { attrs: { href: _vm.companyPage(company.id) } }, [
+                _c("img", {
+                  staticClass: "card-img-top",
+                  attrs: { src: company.logo || _vm.image }
+                }),
+                _vm._v(" "),
+                _c("div", { staticClass: "card-header" }, [
+                  _vm._v(_vm._s(company.name))
+                ])
+              ]),
               _vm._v(" "),
-              _c("div", { staticClass: "card-header" }, [
-                _vm._v(_vm._s(company.name))
+              _c("div", { staticClass: "card-body" }, [
+                _c("p", [_vm._v(_vm._s(company.email))]),
+                _vm._v(" "),
+                _c("p", [_vm._v(_vm._s(company.website))]),
+                _vm._v(" "),
+                _vm.userData.access_level == 10
+                  ? _c("div", [
+                      _c(
+                        "a",
+                        {
+                          staticClass: "btn btn-primary",
+                          attrs: { href: "#" }
+                        },
+                        [_vm._v("Edit")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "a",
+                        {
+                          staticClass: "btn btn-danger float-right",
+                          attrs: { href: "#" }
+                        },
+                        [_vm._v("Delete")]
+                      )
+                    ])
+                  : _vm._e()
               ])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body" }, [
-              _c("p", [_vm._v(_vm._s(company.email))]),
-              _vm._v(" "),
-              _c("p", [_vm._v(_vm._s(company.website))]),
-              _vm._v(" "),
-              _vm.userData.access_level == 10
-                ? _c("div", [
-                    _c(
-                      "a",
-                      { staticClass: "btn btn-primary", attrs: { href: "#" } },
-                      [_vm._v("Edit")]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "a",
-                      {
-                        staticClass: "btn btn-danger float-right",
-                        attrs: { href: "#" }
-                      },
-                      [_vm._v("Delete")]
-                    )
-                  ])
-                : _vm._e()
             ])
           ])
-        ])
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c("paginator", {
+        attrs: { totalPages: _vm.totalPages, pageNumber: _vm.pageNumber },
+        on: {
+          changePage: function($event) {
+            return _vm.gotoPage($event)
+          }
+        }
       }),
-      0
-    ),
-    _vm._v(" "),
-    _vm.totalPages > 1
-      ? _c("nav", { staticClass: "mt-3" }, [
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "modal",
+          attrs: { id: "addCompanyModel", tabindex: "-1", role: "dialog" }
+        },
+        [
           _c(
-            "ul",
-            { staticClass: "pagination justify-content-center" },
+            "div",
+            { staticClass: "modal-dialog", attrs: { role: "document" } },
             [
-              _c(
-                "li",
-                {
-                  staticClass: "page-item",
-                  class: { disabled: _vm.pageNumber == 1 }
-                },
-                [
-                  _c("a", { staticClass: "page-link", attrs: { href: "#" } }, [
-                    _vm._v("<")
+              _c("div", { staticClass: "modal-content" }, [
+                _c("div", { staticClass: "modal-header" }, [
+                  _vm.isNewCompany
+                    ? _c("h5", { staticClass: "modal-title" }, [
+                        _vm._v("Add New Company")
+                      ])
+                    : _c("h5", { staticClass: "modal-title" }, [
+                        _vm._v("Edit Company")
+                      ]),
+                  _vm._v(" "),
+                  _vm._m(0)
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-body" }, [
+                  _c("form", { attrs: { action: "" } }, [
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("label", { attrs: { for: "newCompanyName" } }, [
+                        _vm._v("Name*")
+                      ]),
+                      _vm._v(" "),
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.companyName,
+                            expression: "companyName"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          type: "text",
+                          name: "name",
+                          id: "newCompanyName"
+                        },
+                        domProps: { value: _vm.companyName },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.companyName = $event.target.value
+                          }
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("label", { attrs: { for: "newCompanyEmail" } }, [
+                        _vm._v("Email")
+                      ]),
+                      _vm._v(" "),
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.companyEmail,
+                            expression: "companyEmail"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          type: "text",
+                          name: "email",
+                          id: "newCompanyEmail"
+                        },
+                        domProps: { value: _vm.companyEmail },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.companyEmail = $event.target.value
+                          }
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("label", { attrs: { for: "newCompanyWebsite" } }, [
+                        _vm._v("Website")
+                      ]),
+                      _vm._v(" "),
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.companyWebsite,
+                            expression: "companyWebsite"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          type: "text",
+                          name: "website",
+                          id: "newCompanyWebsite"
+                        },
+                        domProps: { value: _vm.companyWebsite },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.companyWebsite = $event.target.value
+                          }
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("label", { attrs: { for: "newCompanyLogo" } }, [
+                        _vm._v("Logo")
+                      ]),
+                      _vm._v(" "),
+                      _c("input", {
+                        staticClass: "form-control",
+                        attrs: {
+                          type: "file",
+                          name: "logo",
+                          id: "newCompanyLogo"
+                        },
+                        on: { change: _vm.onImageChange }
+                      })
+                    ])
                   ])
-                ]
-              ),
-              _vm._v(" "),
-              _vm._l(_vm.totalPages, function(i) {
-                return _c(
-                  "li",
-                  {
-                    staticClass: "page-item",
-                    class: { active: _vm.pageNumber == i }
-                  },
-                  [
-                    _c(
-                      "a",
-                      { staticClass: "page-link", attrs: { href: "#" } },
-                      [_vm._v(_vm._s(i))]
-                    )
-                  ]
-                )
-              }),
-              _vm._v(" "),
-              _c(
-                "li",
-                {
-                  staticClass: "page-item",
-                  class: { disabled: _vm.pageNumber == _vm.totalPages }
-                },
-                [
-                  _c("a", { staticClass: "page-link", attrs: { href: "#" } }, [
-                    _vm._v(">")
-                  ])
-                ]
-              )
-            ],
-            2
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button", "data-dismiss": "modal" }
+                    },
+                    [_vm._v("Close")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.saveCompany()
+                        }
+                      }
+                    },
+                    [_vm._v("Save changes")]
+                  )
+                ])
+              ])
+            ]
           )
-        ])
-      : _vm._e()
-  ])
+        ]
+      )
+    ],
+    1
+  )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "button",
+      {
+        staticClass: "close",
+        attrs: {
+          type: "button",
+          "data-dismiss": "modal",
+          "aria-label": "Close"
+        }
+      },
+      [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
+    )
+  }
+]
 render._withStripped = true
 
 
